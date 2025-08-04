@@ -1,101 +1,36 @@
 <script lang="ts">
-  import {
-    getNearestColor,
-    hex2color,
-    rgb2color,
-    type Color,
-    type RGBArray,
-  } from "$lib/colors";
+  import { Tabs } from "bits-ui";
 
-  let rgbColor = $state<RGBArray>([0, 0, 0]);
-  let bindableColor = $state("");
-
-  let nearestColor = $state<Color>();
-
-  $effect(() => {
-    if (bindableColor.startsWith("rgb")) {
-      const rgb = rgb2color(bindableColor);
-
-      if (rgb !== null) {
-        rgbColor = rgb;
-        nearestColor = getNearestColor(rgb);
-        return;
-      }
-    }
-
-    if (bindableColor.startsWith("#")) {
-      const rgb = hex2color(bindableColor);
-
-      if (rgb !== null) {
-        rgbColor = rgb;
-        nearestColor = getNearestColor(rgb);
-        return;
-      }
-    }
-
-    if (bindableColor.split(",").length === 3) {
-      const rgb = bindableColor
-        .split(",")
-        .map((it) => Number(it.trim()))
-        .filter((it) => !Number.isNaN(it));
-
-      if (rgb.length === 3) {
-        rgbColor = rgb as RGBArray;
-        nearestColor = getNearestColor(rgb as RGBArray);
-        return;
-      }
-    }
-
-    nearestColor = undefined;
-  });
+  import NearestColor from "$lib/components/NearestColor.svelte";
+  import Image2ColorSpace from "$lib/components/Image2ColorSpace.svelte";
 </script>
 
 <div class="size-full flex items-center justify-center p-10">
   <main
-    class="rounded-2xl bg-amber-50 p-5 border-amber-400 border-2 w-96 flex flex-col gap-3"
+    class="rounded-2xl bg-amber-50 p-5 border-amber-400 border-2 w-max flex flex-col gap-3"
   >
-    <p class="text-gray-600">only HEX & RGB supported</p>
-    <p>Color</p>
-    <input
-      type="text"
-      bind:value={bindableColor}
-      class="border p-2 rounded-xs"
-    />
-    <hr />
-
-    <p>Browser colorpicker</p>
-    <input
-      type="color"
-      bind:value={bindableColor}
-      class="size-10 rounded-xs w-full"
-    />
-
-    <hr />
-
-    <div class="flex">
-      <div class="flex flex-1 gap-3 flex-col items-center">
-        <p class="text-center">
-          Your color: {bindableColor}
-        </p>
-        <div
-          class="size-12 border"
-          style="background-color: rgb({rgbColor.join(',')});"
-        ></div>
-      </div>
-      <div class="flex flex-1 gap-3 flex-col items-center justify-center">
-        {#if nearestColor}
-          <p class="text-center">
-            Nearest color for {bindableColor}
-          </p>
-          <div
-            class="size-12 border"
-            style="background-color: rgb({nearestColor.rgb.join(',')});"
-          ></div>
-          <p>{nearestColor.title}</p>
-        {:else}
-          waiting for a color..
-        {/if}
-      </div>
-    </div>
+    <h1 class="text-center pb-2.5">wplace.live colors utils</h1>
+    <Tabs.Root value="Find nearest color">
+      <Tabs.List class="flex gap-3 mb-2.5 bg-gray-200 p-2 rounded-xl">
+        <Tabs.Trigger
+          class="data-[state=active]:bg-white rounded-xl p-2 cursor-pointer flex-1"
+          value="Find nearest color"
+        >
+          Find nearest color
+        </Tabs.Trigger>
+        <Tabs.Trigger
+          value="Convert image colors"
+          class="data-[state=active]:bg-white rounded-xl p-2 cursor-pointer flex-1"
+        >
+          Image to wplace.live color space
+        </Tabs.Trigger>
+      </Tabs.List>
+      <Tabs.Content value="Find nearest color" class="flex flex-col gap-3">
+        <NearestColor />
+      </Tabs.Content>
+      <Tabs.Content value="Convert image colors" class="flex flex-col gap-3">
+        <Image2ColorSpace />
+      </Tabs.Content>
+    </Tabs.Root>
   </main>
 </div>

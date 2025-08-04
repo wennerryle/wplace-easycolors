@@ -5,7 +5,7 @@ export interface Color {
   title: string;
 }
 
-const colors: Color[] = [
+export const colors: Color[] = [
   {
     rgb: [0, 0, 0],
     title: "Black",
