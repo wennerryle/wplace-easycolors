@@ -4,27 +4,44 @@
     hex2color,
     rgb2color,
     type Color,
+    type RGBArray,
   } from "$lib/colors";
 
-  let color = $state("");
+  let rgbColor = $state<RGBArray>([0, 0, 0]);
+  let bindableColor = $state("");
 
   let nearestColor = $state<Color>();
 
   $effect(() => {
-    if (color.startsWith("rgb")) {
-      const rgb = rgb2color(color);
+    if (bindableColor.startsWith("rgb")) {
+      const rgb = rgb2color(bindableColor);
 
       if (rgb !== null) {
+        rgbColor = rgb;
         nearestColor = getNearestColor(rgb);
         return;
       }
     }
 
-    if (color.startsWith("#")) {
-      const rgb = hex2color(color);
+    if (bindableColor.startsWith("#")) {
+      const rgb = hex2color(bindableColor);
 
       if (rgb !== null) {
+        rgbColor = rgb;
         nearestColor = getNearestColor(rgb);
+        return;
+      }
+    }
+
+    if (bindableColor.split(",").length === 3) {
+      const rgb = bindableColor
+        .split(",")
+        .map((it) => Number(it.trim()))
+        .filter((it) => !Number.isNaN(it));
+
+      if (rgb.length === 3) {
+        rgbColor = rgb as RGBArray;
+        nearestColor = getNearestColor(rgb as RGBArray);
         return;
       }
     }
@@ -33,25 +50,42 @@
   });
 </script>
 
-<div class="size-full flex items-center justify-center">
+<div class="size-full flex items-center justify-center p-10">
   <main
     class="rounded-2xl bg-amber-50 p-5 border-amber-400 border-2 w-96 flex flex-col gap-3"
   >
     <p class="text-gray-600">only HEX & RGB supported</p>
     <p>Color</p>
-    <input type="text" bind:value={color} class="border p-2 rounded-xs" />
+    <input
+      type="text"
+      bind:value={bindableColor}
+      class="border p-2 rounded-xs"
+    />
+    <hr />
+
+    <p>Browser colorpicker</p>
+    <input
+      type="color"
+      bind:value={bindableColor}
+      class="size-10 rounded-xs w-full"
+    />
+
+    <hr />
 
     <div class="flex">
       <div class="flex flex-1 gap-3 flex-col items-center">
         <p class="text-center">
-          Your color: {color}
+          Your color: {bindableColor}
         </p>
-        <div class="size-12 border" style="background-color: {color};"></div>
+        <div
+          class="size-12 border"
+          style="background-color: rgb({rgbColor.join(',')});"
+        ></div>
       </div>
       <div class="flex flex-1 gap-3 flex-col items-center justify-center">
         {#if nearestColor}
           <p class="text-center">
-            Nearest color for {color}
+            Nearest color for {bindableColor}
           </p>
           <div
             class="size-12 border"
